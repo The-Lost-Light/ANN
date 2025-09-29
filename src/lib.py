@@ -21,10 +21,10 @@ def classify(label):
 		return 0
 
 def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
+	return 1 / (1 + np.exp(-x))
 
 def sigmoid_derive(x):
-    return sigmoid(x) * (1 - sigmoid(x))
+	return sigmoid(x) * (1 - sigmoid(x))
 
 def delta_final(prediction, output):
 	return (output - prediction) * prediction * (1 - prediction)

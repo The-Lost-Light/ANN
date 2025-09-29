@@ -1,12 +1,13 @@
 import flet as ft
-import multilayer_perceptron
 import perceptron
+import multilayer_perceptron
 
-import matplotlib.pyplot as plt
+
 
 def gui(page: ft.Page):
 	page.theme_mode = ft.ThemeMode.LIGHT
 	page.title = "NN_HW1_104525006"
+
 	path = ""
 
 	def pick_files_result(e: ft.FilePickerResultEvent):
@@ -27,10 +28,12 @@ def gui(page: ft.Page):
 		if(path == ""):
 			return
 
-		train_button.text = "Training..."
 		train_button.disabled = True
+		train_button.text = "Training..."
+		epoch.value = "Epoch: Training..."
+		accuracy.value = "Accuracy: Training..."
 		train_button.update()
-		result = ["training", "training"]
+		result = ['?', '?']
 		if(switch.value):
 			result = multilayer_perceptron.train(
 				file_path=path,
@@ -48,9 +51,6 @@ def gui(page: ft.Page):
 			)
 		epoch.value = "Epoch: " + str(result[0])
 		accuracy.value = "Accuracy: " + str(result[1])
-		page.update()
-		if(result[2]):
-			plt.show()
 		train_button.text = "Train!"
 		train_button.disabled = False
 		page.update()
