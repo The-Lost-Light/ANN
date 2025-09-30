@@ -12,7 +12,7 @@ def predict(weights):
 	return predict_bind
 
 
-def train(file_path, learning_rate, epochs, accuracy_limit, hidden_layers_size):
+def train(file_path, file_name, learning_rate, epochs, accuracy_limit, hidden_layers_size):
 	data = np.loadtxt(file_path)
 	dimension = np.size(data, 1) - 1
 	layer_size = [dimension, *hidden_layers_size, 1]
@@ -48,6 +48,6 @@ def train(file_path, learning_rate, epochs, accuracy_limit, hidden_layers_size):
 			break
 
 	layout = plot.layout(data)
-	plot.decision_boundary(predict(weights), (train_data, test_data), dimension, layout, mlp=True)
+	fig = plot.decision_boundary(file_name, predict(weights), (train_data, test_data), dimension, layout, mlp=True)
 
-	return epoch+1, accuracy
+	return epoch+1, accuracy, weights, fig

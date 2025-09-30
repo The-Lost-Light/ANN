@@ -1,7 +1,8 @@
 import flet as ft
+from flet.matplotlib_chart import MatplotlibChart
+import os
 import perceptron
 import multilayer_perceptron
-
 
 
 def gui(page: ft.Page):
@@ -13,7 +14,7 @@ def gui(page: ft.Page):
 	def pick_files_result(e: ft.FilePickerResultEvent):
 		nonlocal path
 		if(e.files):
-			selected_files.value = e.files[0].name
+			selected_files.value = os.path.splitext(e.files[0].name)[0]
 			path = e.files[0].path
 			selected_files.update()
 
@@ -24,6 +25,22 @@ def gui(page: ft.Page):
 		layer_size.disabled = not switch.value
 		layer_size.update()
 
+
+	def open_dialog(result):
+		epoch, accuracy, _, fig = result
+		dialog = ft.AlertDialog(
+			title=ft.Text("Plot"),
+			content=ft.Column(controls=[
+				MatplotlibChart(fig, expand=True),
+				ft.Row(controls=[
+					ft.Text("Epoch: " + str(epoch)),
+					ft.Text("Accuracy: " + str(accuracy))
+				])
+			])
+		)
+		page.open(dialog)
+
+
 	def train(e):
 		if(path == ""):
 			return
@@ -32,11 +49,13 @@ def gui(page: ft.Page):
 		train_button.text = "Training..."
 		epoch.value = "Epoch: Training..."
 		accuracy.value = "Accuracy: Training..."
-		train_button.update()
+		weights.value = "Weights:  Training..."
+		page.update()
 		result = ['?', '?']
 		if(switch.value):
 			result = multilayer_perceptron.train(
 				file_path=path,
+				file_name=selected_files.value,
 				learning_rate = (int(learning_rate.value) if learning_rate.value else 0.2),
 				epochs = (int(epochs.value) if epochs.value else 100),
 				accuracy_limit = (float(accuracy_limit.value) if accuracy_limit.value else 0.95),
@@ -45,14 +64,18 @@ def gui(page: ft.Page):
 		else:
 			result = perceptron.train(
 				file_path=path,
+				file_name=selected_files.value,
 				learning_rate = (int(learning_rate.value) if learning_rate.value else 0.2),
 				epochs = (int(epochs.value) if epochs.value else 100),
 				accuracy_limit = (float(accuracy_limit.value) if accuracy_limit.value else 0.95),
 			)
 		epoch.value = "Epoch: " + str(result[0])
 		accuracy.value = "Accuracy: " + str(result[1])
+		weights.value = "Weights: " + str(result[2])
 		train_button.text = "Train!"
 		train_button.disabled = False
+		if(result[3]):
+			open_dialog(result)
 		page.update()
 
 	page.floating_action_button = train_button = ft.FloatingActionButton(
@@ -89,8 +112,9 @@ def gui(page: ft.Page):
 					ft.Column(controls=[
 						epoch := ft.Text("Epoch: "),
 						accuracy := ft.Text("Accuracy: "),
+						weights := ft.Text("Weights: ")
 					]),
-					alignment=ft.alignment.center,
+					alignment=ft.alignment.center
 				)
 			]),
 			expand=True,

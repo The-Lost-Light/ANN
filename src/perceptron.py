@@ -3,7 +3,7 @@ import lib
 import plot
 
 
-def slope(weight):
+def get_slope(weight):
 	return (-weight[1] / weight[2]) if(weight[-1] != 0) else np.inf
 
 
@@ -20,7 +20,7 @@ def predict(weight):
 	return predict_bind
 
 
-def train(file_path, learning_rate, epochs, accuracy_limit):
+def train(file_path, file_name, learning_rate, epochs, accuracy_limit):
 	data = np.loadtxt(file_path)
 	dimension = np.size(data, 1) - 1
 	train_data, test_data = lib.preprocessing(data)
@@ -48,6 +48,7 @@ def train(file_path, learning_rate, epochs, accuracy_limit):
 
 	# plot
 	layout = plot.layout(data)
-	plot.decision_boundary(predict(weight), (train_data, test_data), dimension, layout, slope=slope(weight) if dimension == 2 else None)
+	slope= get_slope(weight) if dimension == 2 else None
+	fig = plot.decision_boundary(file_name, predict(weight), (train_data, test_data), dimension, layout, slope=slope)
 
-	return epoch+1, accuracy
+	return epoch+1, accuracy, weight, fig
