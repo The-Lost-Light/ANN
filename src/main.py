@@ -56,18 +56,18 @@ def gui(page: ft.Page):
 			result = multilayer_perceptron.train(
 				file_path=path,
 				file_name=selected_files.value,
-				learning_rate = (int(learning_rate.value) if learning_rate.value else 0.2),
+				learning_rate = (float(learning_rate.value) if learning_rate.value else 0.2),
 				epochs = (int(epochs.value) if epochs.value else 100),
 				accuracy_limit = (float(accuracy_limit.value) if accuracy_limit.value else 0.95),
-				hidden_layers_size = ([int(word.strip()) for word in layer_size.value.split(',')] if layer_size.value else [20, 12, 6]),
+				hidden_layers_size = ([int(word.strip()) for word in layer_size.value.split(',')] if layer_size.value else [20, 12, 6])
 			)
 		else:
 			result = perceptron.train(
 				file_path=path,
 				file_name=selected_files.value,
-				learning_rate = (int(learning_rate.value) if learning_rate.value else 0.2),
+				learning_rate = (float(learning_rate.value) if learning_rate.value else 0.2),
 				epochs = (int(epochs.value) if epochs.value else 100),
-				accuracy_limit = (float(accuracy_limit.value) if accuracy_limit.value else 0.95),
+				accuracy_limit = (float(accuracy_limit.value) if accuracy_limit.value else 0.95)
 			)
 		epoch.value = "Epoch: " + str(result[0])
 		accuracy.value = "Accuracy: " + str(result[1])

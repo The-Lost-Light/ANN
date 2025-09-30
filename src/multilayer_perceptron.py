@@ -3,11 +3,23 @@ import lib
 import plot
 
 
+def sigmoid(x):
+	return 1 / (1 + np.exp(-x))
+
+
+def sigmoid_derive(x):
+	return sigmoid(x) * (1 - sigmoid(x))
+
+
+def delta_final(prediction, output):
+	return (output - prediction) * prediction * (1 - prediction)
+
+
 def predict(weights):
 	def predict_bind(x):
 		y = x
 		for w in weights:
-			y = lib.sigmoid(w @ np.array([-1, *y]))
+			y = sigmoid(w @ np.array([-1, *y]))
 		return lib.classify(y)
 	return predict_bind
 
@@ -28,10 +40,10 @@ def train(file_path, file_name, learning_rate, epochs, accuracy_limit, hidden_la
 			# Feedforward
 			y = [row[:-1]]
 			for weight in weights:
-				y.append(lib.sigmoid(weight @ [-1, *y[-1]]))
+				y.append(sigmoid(weight @ [-1, *y[-1]]))
 
 			# Backpropagation
-			delta = [lib.delta_final(y[-1], lib.classify(row[-1]))]
+			delta = [delta_final(y[-1], lib.classify(row[-1]))]
 			for layer in range(len(layer_size)-2, 0, -1):
 				delta = [y[layer] * (1 - y[layer]) * (weights[layer].T[1:] @ delta[0]), *delta]
 			for layer in range(len(weights)):
