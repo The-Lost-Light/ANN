@@ -1,5 +1,6 @@
 import flet as ft
 from flet.matplotlib_chart import MatplotlibChart
+import matplotlib.pyplot as plt
 import os
 import perceptron
 import multilayer_perceptron
@@ -39,6 +40,7 @@ def gui(page: ft.Page):
 			])
 		)
 		page.open(dialog)
+		plt.close(fig)
 
 
 	def train(e):

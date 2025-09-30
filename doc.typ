@@ -1,5 +1,5 @@
 #import "@preview/cheq:0.3.0": checklist
-#show: checklist
+#show: checklist.with(fill: luma(95%), stroke: blue, radius: .2em)
 #set heading(numbering: "一.1.a")
 
 #let assets = "doc_assets"
@@ -7,8 +7,8 @@
 = 加分題完成功能
 - [x] 三維資料圖形顯示介面
 - [x] 能夠處理多維資料(四維以上)
-- [ ] 數字辨識
-- [ ] 可辨識兩群以上的資料
+- [!] 數字辨識(無自訂測資實作)
+- [x] 可辨識兩群以上的資料
 
 = 程式執行說明 (GUI功能說明)
 #image(assets + "/gui.png")
@@ -68,9 +68,16 @@ for layer in range(len(weights)):
 	weights[layer] += learning_rate * np.outer(delta[layer], [-1, *y[layer]])
 ```
 $w_(j i)=w_(j i)+Delta w_(j i)=w_(j i)+eta times delta_j (n) times y_i (n)$
+=== 辨識多群資料
+方法: 將輸出層從單個節點調至群數個, 並將標籤轉換成One-Hot(只有將標籤作為索引為1, 其餘為0的陣列), 最後預測輸出的陣列最高值的索引即是預測結果
 = 實驗結果
+所有訓練參數相同
+- 學習率: 0.4
+- Epoch: 500
+- 準確率限制: 0.99
+- 隱藏層大小: [20, 12, 6] (多層感知機)
 == 基本題
-#let files = (
+#let slp_files = (
 	"2cring",
 	"2Ccircle1",
 	"2Circle1",
@@ -87,7 +94,7 @@ $w_(j i)=w_(j i)+Delta w_(j i)=w_(j i)+eta times delta_j (n) times y_i (n)$
 
 #grid(
 	gutter: 2em,
-	..files.map(file => grid(
+	..slp_files.map(file => grid(
 		columns: 2,
 		gutter: 2em,
 		block(align(center)[
@@ -101,17 +108,28 @@ $w_(j i)=w_(j i)+Delta w_(j i)=w_(j i)+eta times delta_j (n) times y_i (n)$
 	))
 )
 == 加分題
+#let mlp_files = (
+	"5CloseS1",
+	"C3D",
+	"perceptron3",
+	"perceptron4",
+	"xor"
+)
+
 #grid(
-	columns: 2,
 	gutter: 2em,
-	block(align(center)[
-		#image(assets + "/perceptron3.png", width: 90%)
-		#text(0.8em, "perceptron3")
-	]),
-	block(align(center)[
-		#image(assets + "/perceptron3-mlp.png", width: 90%)
-		#text(0.8em, "perceptron3 (mlp)")
-	])
+	..mlp_files.map(file => grid(
+		columns: 2,
+		gutter: 2em,
+		block(align(center)[
+			#image(assets + "/" + file + ".png", width: 90%)
+			#text(0.8em, file)
+		]),
+		block(align(center)[
+			#image(assets + "/" + file + "-mlp.png", width: 90%)
+			#text(0.8em, file + " (mlp)")
+		])
+	))
 )
 = 實驗結果分析及討論
 + 訓練次數過小容易造成未擬和, 訓練次數過大容易造成過擬和

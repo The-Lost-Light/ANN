@@ -21,9 +21,7 @@ def predict(weight):
 
 
 def train(file_path, file_name, learning_rate, epochs, accuracy_limit):
-	data = np.loadtxt(file_path)
-	dimension = np.size(data, 1) - 1
-	train_data, test_data = lib.preprocessing(data)
+	train_data, test_data , dimension, label_unique, layout = lib.preprocessing(file_path)
 
 	# Train
 	weight = np.array([-1, *np.zeros(dimension - 1), 1])
@@ -47,8 +45,7 @@ def train(file_path, file_name, learning_rate, epochs, accuracy_limit):
 			break
 
 	# plot
-	layout = plot.layout(data)
 	slope= get_slope(weight) if dimension == 2 else None
-	fig = plot.decision_boundary(file_name, predict(weight), (train_data, test_data), dimension, layout, slope=slope)
+	fig = plot.decision_boundary(file_name, predict(weight), (train_data, test_data), dimension, layout, label_unique, slope=slope)
 
 	return epoch+1, accuracy, weight, fig
