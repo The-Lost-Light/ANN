@@ -2,27 +2,21 @@ import numpy as np
 
 
 class MLP:
-	def __init__(self, hidden_layer_sizes=[8,4], learning_rate=0.001, epochs=100):
+	def __init__(self, hidden_layer_sizes=[8,4], learning_rate=0.001, epochs=100, leaky_const=0.01):
 		self.hidden_layer_sizes = hidden_layer_sizes
 		self.learning_rate = learning_rate
 		self.epochs = epochs
+		self.leaky_const = leaky_const
 
-	def _standardize(self, X):
-		self.mean = np.mean(X, axis=0)
-		self.std = np.std(X, axis=0)
+	def _minmax(self, X, min, max):
+		self.min = (np.min(X, axis=0), min)
+		self.max = (np.max(X, axis=0), max)
 
-	def _standardize_transform(self, X):
-		return (X - self.mean) / self.std
+	def _minmax_transform(self, x, index):
+		return (x - self.min[index]) / (self.max[index] - self.min[index])
 
-	def _minmax(self, min, max):
-		self.y_min = min
-		self.y_max = max
-
-	def _minmax_transform(self, y):
-		return (y - self.y_min) / (self.y_max - self.y_min)
-
-	def _minmax_transform_inverse(self, y):
-		return y * (self.y_max - self.y_min) + self.y_min
+	def _minmax_transform_inverse(self, x):
+		return x * (self.max[1] - self.min[1]) + self.min[1]
 
 	def _initialize_weights(self, n_features, n_outputs):
 		layer_sizes = [n_features, *self.hidden_layer_sizes, n_outputs]
@@ -32,10 +26,10 @@ class MLP:
 			self.weights.append(np.random.randn(layer_sizes[i + 1], layer_sizes[i] + 1))
 
 	def _activation(self, v):
-		return np.maximum(0, v)
+		return np.where(v > 0, v, self.leaky_const * v)
 
 	def _activation_derive(self, v):
-		return (v > 0).astype(int)
+		return np.where(v > 0, 1, self.leaky_const)
 
 	def _forward(self, input):
 		activations = [input]
@@ -65,10 +59,9 @@ class MLP:
 		X = np.asarray(X)
 		y = np.asarray(y)
 
-		self._standardize(X)
-		X = self._standardize_transform(X)
-		self._minmax(-40, 40)
-		y = self._minmax_transform(y)
+		self._minmax(X, -40, 40)
+		X = self._minmax_transform(X, 0)
+		y = self._minmax_transform(y, 1)
 
 		n_samples, n_features = X.shape
 		n_outputs = y.shape[1]
@@ -87,6 +80,6 @@ class MLP:
 
 	def predict(self, x):
 		x = np.asarray(x)
-		self._standardize_transform(x)
+		x = self._minmax_transform(x, 0)
 		prediction = self._forward(x)[-1][0, 0]
 		return self._minmax_transform_inverse(prediction)
