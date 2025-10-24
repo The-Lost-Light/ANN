@@ -2,7 +2,13 @@ import numpy as np
 
 
 class MLP:
-	def __init__(self, hidden_layer_sizes=[8,4], learning_rate=0.001, epochs=100, leaky_const=0.01):
+	def __init__(
+		self,
+		hidden_layer_sizes=[8, 4],
+		learning_rate=0.001,
+		epochs=100,
+		leaky_const=0.01,
+	):
 		self.hidden_layer_sizes = hidden_layer_sizes
 		self.learning_rate = learning_rate
 		self.epochs = epochs
@@ -46,7 +52,7 @@ class MLP:
 	def _backward(self, activations, y):
 		grads_W = [None] * len(self.weights)
 
-		delta = (y - activations[-1])
+		delta = y - activations[-1]
 		grads_W[-1] = np.outer(delta.reshape(-1), np.insert(activations[-2], 0, -1))
 
 		for i in reversed(range(len(self.weights) - 1)):
