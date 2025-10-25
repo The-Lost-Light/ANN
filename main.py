@@ -1,8 +1,6 @@
 import numpy as np
 from mlp import MLP
-from model.geometry import Point2D, Line2D
-import simulation
-
+from simulation import Simulation
 
 train_data = np.loadtxt("data/train4dAll.txt")
 X = train_data[:, :-1]
@@ -16,12 +14,15 @@ with open("data/軌道座標點.txt", "r") as f:
 car_coordinate = [float(x) for x in first_line.split(",")]
 area_data = np.loadtxt("data/軌道座標點.txt", delimiter=",", skiprows=1)
 area_coordinate = area_data[2:]
+(x1, y1), (x2, y2) = area_data[0], area_data[1]
 finish_area_coordinate = [
-	area_data[0],
-	[area_data[1, 0], area_data[0, 1]],
-	area_data[1],
-	[area_data[0, 0], area_data[1, 1]],
+	[x1, y1],
+	[x2, y1],
+	[x2, y2],
+	[x1, y2],
 ]
-start_line = Line2D(Point2D(-6, 0), Point2D(6, 0))
-start_point = Point2D(0, 0)
-simulation.run(area_coordinate, finish_area_coordinate, start_line, start_point)
+start_line = [[-6, 0], [6, 0]]
+start_point = [0, 0]
+
+simulation = Simulation(area_coordinate, finish_area_coordinate, start_line, start_point)
+simulation.run(mlp)
