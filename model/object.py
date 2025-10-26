@@ -10,8 +10,8 @@ def angle_to_vector(angle):
 class Car:
 	def __init__(
 		self,
-		initial_position=[0, 0],
-		initial_angle=90,
+		initial_position,
+		initial_angle,
 		diameter=6,
 		angle_min=-90,
 		angle_max=270,
