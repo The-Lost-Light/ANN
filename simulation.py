@@ -1,7 +1,8 @@
+import os
 import numpy as np
 from mlp import MLP
 import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
+from matplotlib.patches import Circle, Polygon
 from model.object import Car, Ground
 
 
@@ -37,6 +38,7 @@ class Simulation:
 		return X, y
 
 	def train(self, data_path, **train_parameters):
+		self.data_name = os.path.basename(data_path)
 		self.mlp = MLP(**train_parameters)
 		X, y = self._load_train_data(data_path)
 		self.dimension = X.shape[1]
@@ -46,6 +48,7 @@ class Simulation:
 		area = self.ground.area
 		finish_area = self.ground.finish_area
 		self.distance = []
+		self.wheelAngle = []
 
 		while True:
 			position = self.car.position[-1]
@@ -57,10 +60,21 @@ class Simulation:
 				break
 
 			input = self.distance[-1] if self.dimension == 3 else [*self.car.position[-1], *self.distance[-1]]
-			wheelAngle = self.mlp.predict(input)
-			self.car.move(wheelAngle)
+			self.wheelAngle.append(self.mlp.predict(input))
+			self.car.move(self.wheelAngle[-1])
 
-		self.plot()
+	def save_data(self):
+		position = np.asarray(self.car.position[:-1])
+		distance = np.asarray(self.distance[:-1])
+		wheelAngle = np.asarray(self.wheelAngle).reshape(-1, 1)
+
+		if self.dimension == 3:
+			output_data = np.concatenate((distance, wheelAngle), axis=1)
+		elif self.dimension == 5:
+			output_data = np.concatenate((position, distance, wheelAngle), axis=1)
+
+		os.makedirs("logs", exist_ok=True)
+		np.savetxt("logs/" + "track" + str(self.dimension + 1) + "D.txt", output_data, fmt="%.7f")
 
 	def plot(self):
 		fig, ax = plt.subplots()
@@ -79,8 +93,18 @@ class Simulation:
 
 		for i in range(len(self.car.position)):
 			ax.plot([p.x for p in self.car.position][: i + 1], [p.y for p in self.car.position][: i + 1], c="blue")
+			circle = Circle(
+				(self.car.position[i].x, self.car.position[i].y),
+				radius=self.car.radius,
+				edgecolor="black",
+				facecolor="none",
+				linewidth=1,
+			)
+			ax.add_patch(circle)
 			distances = self.distance[i]
 			text_handle.set_text(f"Front: {distances[0]:.2f}\nRight: {distances[1]:.2f}\nLeft: {distances[2]:.2f}")
 			plt.pause(0.1)
+			if i < len(self.car.position) - 1:
+				circle.remove()
 
 		plt.show()
