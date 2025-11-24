@@ -6,8 +6,23 @@ class HopfieldNetwork:
 		self.pattern_size = pattern_size
 		self.weights = np.zeros((pattern_size, pattern_size))
 
-	def _network_recall(self, x):
-		v = self.weights @ x - self.theta
+	def train(self, patterns, threadhold=False):
+		N = len(patterns)
+		if N == 0:
+			return
+
+		for p in patterns:
+			self.weights += np.outer(p, p.T)
+
+		self.weights -= N * np.identity(self.pattern_size)
+		self.weights /= self.pattern_size
+		self.theta = np.sum(self.weights, axis=0).reshape(-1, 1) if threadhold else np.zeros((len(self.weights), 1))
+
+	def _update_unit(self, x, i=None):
+		if i is not None:
+			v = self.weights[i] @ x - self.theta[i]
+		else:
+			v = self.weights @ x - self.theta
 		for j in range(len(v)):
 			if v[j] > 0:
 				v[j] = 1
@@ -17,24 +32,15 @@ class HopfieldNetwork:
 				v[j] = -1
 		return v
 
-	def train(self, patterns):
-		N = len(patterns)
-		if N == 0:
-			return
-
-		for p in patterns:
-			self.weights += np.dot(p, p.T)
-
-		self.weights -= N * np.identity(self.pattern_size)
-		self.weights /= self.pattern_size
-		self.theta = np.sum(self.weights, axis=0).reshape(-1, 1)
-
-	def predict(self, pattern, max_iter=100):
-		recall_old = None
-		recall = pattern
-		iter = 0
-		while (recall != recall_old).any() and iter < max_iter:
-			recall_old = recall
-			recall = self._network_recall(recall_old)
-			iter += 1
-		return recall
+	def predict(self, pattern, max_iter=1000, asynchronous=False):
+		x = pattern.copy()
+		for iter in range(max_iter):
+			old_x = x.copy()
+			if asynchronous:
+				i = np.random.randint(0, self.pattern_size)
+				x[i] = self._update_unit(x, i)[0]
+			else:
+				x = self._update_unit(x)
+			if np.array_equal(x, old_x) and iter >= 100:
+				break
+		return x
