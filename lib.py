@@ -1,7 +1,5 @@
 import numpy as np
 
-import lib
-
 
 def load_patterns(level, lines):
 	def load(data):
@@ -11,7 +9,7 @@ def load_patterns(level, lines):
 		pattern_numbers = (len(patterns_data) + 1) // (lines + 1)
 		patterns = []
 		for n in range(pattern_numbers):
-			current_pattern = lib.strings2list(patterns_data[(lines + 1) * n : (lines + 1) * n + lines])
+			current_pattern = strings2list(patterns_data[(lines + 1) * n : (lines + 1) * n + lines])
 			patterns.append(current_pattern)
 
 		return patterns, len(patterns_data[0])
